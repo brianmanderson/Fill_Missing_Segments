@@ -41,7 +41,7 @@ class Fill_Missing_Segments(object):
         :param pred: A mask of your predictions with N channels on the end, N=0 is background [# Images, 512, 512, N]
         :param liver: A mask of the desired region [# Images, 512, 512]
         :param MauererDistanceMap: Filter
-        :param reduce:
+        :param reduce: Save time and only work on masked region
         :return:
         '''
         pred = pred.astype('int')
@@ -70,3 +70,7 @@ class Fill_Missing_Segments(object):
 
 if __name__ == '__main__':
     xxx = 1
+    # Fill_Segments = Fill_Missing_Segments()
+    # liver = np.load(os.path.join('.','liver.npy'))
+    # pred = np.load(os.path.join('.','pred.npy'))
+    # output = Fill_Segments.make_distance_map(pred,liver)
