@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
 import os, sys
-if os.path.exists('\\\\mymdafiles\\di_data1\\'):
+if os.path.exists(r'K:\Morfeus'):
     sys.path.append(os.path.join('..', '..', '..'))
     from Keras_Utils import plot_scroll_Image
 
@@ -36,7 +36,7 @@ class Fill_Missing_Segments(object):
         MauererDistanceMap.UseImageSpacingOn()
         MauererDistanceMap.SquaredDistanceOff()
         self.MauererDistanceMap = MauererDistanceMap
-    def make_distance_map(self, pred, liver, reduce=True):
+    def make_distance_map(self, pred, liver, reduce=True, spacing=(0.975,0.975,2.5)):
         '''
         :param pred: A mask of your predictions with N channels on the end, N=0 is background [# Images, 512, 512, N]
         :param liver: A mask of the desired region [# Images, 512, 512]
@@ -44,7 +44,6 @@ class Fill_Missing_Segments(object):
         :param reduce:
         :return:
         '''
-        spacing = (0.975,0.975, 2.5)
         pred = pred.astype('int')
         min_z, min_r, max_r, min_c, max_c = 0, 0, 512, 0, 512
         max_z = pred.shape[0]
@@ -69,14 +68,5 @@ class Fill_Missing_Segments(object):
         pred[min_z:max_z,min_r:max_r,min_c:max_c] = output
         return pred
 
-# Fill_Segments = Fill_Missing_Segments()
-#
-# liver = np.load(os.path.join('.','liver.npy'))
-# pred = np.load(os.path.join('.','pred.npy'))
-# output = Fill_Segments.make_distance_map(pred,liver)
-# xxx = 1
-
 if __name__ == '__main__':
     xxx = 1
-    # Fill_Segments = Fill_Missing_Segments()
-    # output = Fill_Segments.make_distance_map(pred,liver)
