@@ -1,11 +1,11 @@
 import SimpleITK as sitk
 import numpy as np
 import os, sys
-if os.path.exists(r'K:\Morfeus'):
-    sys.path.append(os.path.join('..', '..', '..'))
+
+def visualize():
+    if os.path.exists(r'K:\Morfeus'):
+        sys.path.append(os.path.join('..', '..', '..'))
     from Keras_Utils import plot_scroll_Image
-
-
 def get_bounding_box_indexes(annotation):
     '''
     :param annotation: A binary image of shape [# images, # rows, # cols, channels]
