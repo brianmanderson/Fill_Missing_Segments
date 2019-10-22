@@ -1,6 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
 import os, sys
+from Utils import plot_scroll_Image
 
 def visualize():
     if os.path.exists(r'K:\Morfeus'):
@@ -36,7 +37,7 @@ class Fill_Missing_Segments(object):
         MauererDistanceMap.UseImageSpacingOn()
         MauererDistanceMap.SquaredDistanceOff()
         self.MauererDistanceMap = MauererDistanceMap
-    def make_distance_map(self, pred, liver, reduce=True, spacing=(10,0.975,0.975)):
+    def make_distance_map(self, pred, liver, reduce=True, spacing=(0.975,0.975,10)):
         '''
         :param pred: A mask of your predictions with N channels on the end, N=0 is background [# Images, 512, 512, N]
         :param liver: A mask of the desired region [# Images, 512, 512]
@@ -45,6 +46,7 @@ class Fill_Missing_Segments(object):
         :return:
         '''
         pred = pred.astype('int')
+        pred[liver==0] = 0
         min_z, min_r, max_r, min_c, max_c = 0, 0, 512, 0, 512
         max_z = pred.shape[0]
         if reduce:
