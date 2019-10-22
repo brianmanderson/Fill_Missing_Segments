@@ -1,7 +1,6 @@
 import SimpleITK as sitk
 import numpy as np
 import os, sys
-from Utils import plot_scroll_Image
 
 def visualize():
     if os.path.exists(r'K:\Morfeus'):
