@@ -1,11 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
-import os, sys
 
-def visualize():
-    if os.path.exists(r'K:\Morfeus'):
-        sys.path.append(os.path.join('..', '..', '..'))
-    from Keras_Utils import plot_scroll_Image
+
 def get_bounding_box_indexes(annotation):
     '''
     :param annotation: A binary image of shape [# images, # rows, # cols, channels]
@@ -29,6 +25,7 @@ def get_bounding_box_indexes(annotation):
     min_c_s, max_c_s = indexes[0], indexes[-1]
     return min_z_s, int(max_z_s + 1), min_r_s, int(max_r_s + 1), min_c_s, int(max_c_s + 1)
 
+
 class Fill_Missing_Segments(object):
     def __init__(self):
         MauererDistanceMap = sitk.SignedMaurerDistanceMapImageFilter()
@@ -36,16 +33,17 @@ class Fill_Missing_Segments(object):
         MauererDistanceMap.UseImageSpacingOn()
         MauererDistanceMap.SquaredDistanceOff()
         self.MauererDistanceMap = MauererDistanceMap
-    def make_distance_map(self, pred, liver, reduce=True, spacing=(0.975,0.975,10)):
+    def make_distance_map(self, pred, liver, reduce=True, spacing=(0.975,0.975,2.5)):
         '''
         :param pred: A mask of your predictions with N channels on the end, N=0 is background [# Images, 512, 512, N]
         :param liver: A mask of the desired region [# Images, 512, 512]
+        :param MauererDistanceMap: Filter
         :param reduce: Save time and only work on masked region
-        :param spacing: slice spacing, recommend to set the z to a very high number (z, x, y)
         :return:
         '''
-        pred = pred.astype('int')
-        pred[liver==0] = 0
+        liver = np.squeeze(liver)
+        pred = np.squeeze(pred)
+        pred = np.round(pred).astype('int')
         min_z, min_r, max_r, min_c, max_c = 0, 0, 512, 0, 512
         max_z = pred.shape[0]
         if reduce:
