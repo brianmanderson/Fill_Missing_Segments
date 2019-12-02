@@ -79,6 +79,7 @@ class Fill_Missing_Segments(object):
         MauererDistanceMap.UseImageSpacingOn()
         MauererDistanceMap.SquaredDistanceOff()
         self.MauererDistanceMap = MauererDistanceMap
+        
     def make_distance_map(self, pred, liver, reduce=True, spacing=(0.975,0.975,2.5)):
         '''
         :param pred: A mask of your predictions with N channels on the end, N=0 is background [# Images, 512, 512, N]
@@ -112,6 +113,7 @@ class Fill_Missing_Segments(object):
         output[mask,np.argmin(values,axis=-1)] = 1
         pred[min_z:max_z,min_r:max_r,min_c:max_c] = output
         return pred
+
 
 if __name__ == '__main__':
     xxx = 1
