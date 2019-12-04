@@ -28,7 +28,20 @@ def get_bounding_box_indexes(annotation):
     return min_z_s, int(max_z_s + 1), min_r_s, int(max_r_s + 1), min_c_s, int(max_c_s + 1)
 
 
-def remove_non_liver(annotations, threshold=0.5, volume_threshold=9999999, do_3D = True, do_2D=False):
+def remove_non_liver(annotations, threshold=0.5, max_volume=9999999, min_volume=0, max_area=99999, min_area=0,
+                     do_3D = True, do_2D=False, spacing=None):
+    '''
+    :param annotations: An annotation of shape [Z_images, rows, columns]
+    :param threshold: Threshold of probability from 0.0 to 1.0
+    :param max_volume: Max volume of structure allowed
+    :param min_volume: Minimum volume of structure allowed
+    :param max_area: Max volume of structure allowed
+    :param min_area: Minimum volume of structure allowed
+    :param do_3D: Do a 3D removal of structures, only take largest connected structure
+    :param do_2D: Do a 2D removal of structures, only take largest connected structure
+    :param spacing: Spacing of elements, in form of [z_spacing, row_spacing, column_spacing]
+    :return: Masked annotation
+    '''
     annotations = copy.deepcopy(annotations)
     annotations = np.squeeze(annotations)
     if not annotations.dtype == 'int':
@@ -42,8 +55,12 @@ def remove_non_liver(annotations, threshold=0.5, volume_threshold=9999999, do_3D
             max_val = 0
             for i in range(1,labels.max()+1):
                 new_area = labels[labels == i].shape[0]
-                if new_area > volume_threshold:
-                    continue
+                if spacing is not None:
+                    volume = np.prod(spacing) * new_area
+                    if volume > max_volume:
+                        continue
+                    elif volume < min_volume:
+                        continue
                 area.append(new_area)
                 if new_area == max(area):
                     max_val = i
@@ -61,8 +78,12 @@ def remove_non_liver(annotations, threshold=0.5, volume_threshold=9999999, do_3D
                 max_val = 0
                 for i in range(1, labels.max() + 1):
                     new_area = labels[labels == i].shape[0]
-                    if new_area > volume_threshold:
-                        continue
+                    if spacing is not None:
+                        temp_area = np.prod(spacing[1:]) * new_area
+                        if temp_area > max_area:
+                            continue
+                        elif temp_area < min_area:
+                            continue
                     area.append(new_area)
                     if new_area == max(area):
                         max_val = i
