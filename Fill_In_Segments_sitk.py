@@ -129,7 +129,7 @@ class Fill_Missing_Segments(object):
             previous_iteration = copy.deepcopy(np.argmax(annotations,axis=-1))
             annotations = remove_56_78(annotations)
             for i in range(1, annotations.shape[-1]):
-                annotations[..., i] = remove_non_liver(annotations[..., i], do_3D=False, do_2D=True,min_area=10,spacing=re_organized_spacing)
+                annotations[..., i] = remove_non_liver(annotations[..., i], do_3D=True, do_2D=True,min_area=10,spacing=re_organized_spacing)
             annotations = self.make_distance_map(annotations, ground_truth,spacing=spacing)
             differences.append(np.abs(np.sum(previous_iteration[ground_truth==1]-np.argmax(annotations,axis=-1)[ground_truth==1])))
         return annotations
