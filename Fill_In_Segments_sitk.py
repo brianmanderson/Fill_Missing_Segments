@@ -93,6 +93,23 @@ def remove_non_liver(annotations, threshold=0.5, max_volume=9999999, min_volume=
     return annotations
 
 
+def remove_56_78(annotations):
+    amounts = np.sum(annotations, axis=(1, 2))
+    indexes = np.where((np.max(amounts[:, (5, 6)], axis=-1) > 0) & (np.max(amounts[:, (7, 8)], axis=-1) > 0))
+    if indexes:
+        indexes = indexes[0]
+        for i in indexes:
+            if amounts[i, 5] < amounts[i, 8]:
+                annotations[i, ..., 5] = 0
+            else:
+                annotations[i, ..., 8] = 0
+            if amounts[i, 6] < amounts[i, 7]:
+                annotations[i, ..., 6] = 0
+            else:
+                annotations[i, ..., 7] = 0
+    return annotations
+
+
 class Fill_Missing_Segments(object):
     def __init__(self):
         MauererDistanceMap = sitk.SignedMaurerDistanceMapImageFilter()
@@ -100,7 +117,23 @@ class Fill_Missing_Segments(object):
         MauererDistanceMap.UseImageSpacingOn()
         MauererDistanceMap.SquaredDistanceOff()
         self.MauererDistanceMap = MauererDistanceMap
-        
+
+    def iterate_annotations(self, annotations, ground_truth, spacing, allowed_differences=50, max_iteration=15):
+        annotations[ground_truth == 0] = 0
+        re_organized_spacing = spacing[-1::-1]
+        differences = [0,np.inf]
+        index = 0
+        while np.abs(differences[-1] - differences[-2]) > allowed_differences and index < max_iteration:
+            index += 1
+            print('Iterating {}'.format(index))
+            previous_iteration = copy.deepcopy(np.argmax(annotations,axis=-1))
+            annotations = remove_56_78(annotations)
+            for i in range(1, annotations.shape[-1]):
+                annotations[..., i] = remove_non_liver(annotations[..., i], do_3D=False, do_2D=True,min_area=10,spacing=re_organized_spacing)
+            annotations = self.make_distance_map(annotations, ground_truth,spacing=spacing)
+            differences.append(np.abs(np.sum(previous_iteration[ground_truth==1]-np.argmax(annotations,axis=-1)[ground_truth==1])))
+        return annotations
+
     def make_distance_map(self, pred, liver, reduce=True, spacing=(0.975,0.975,2.5)):
         '''
         :param pred: A mask of your predictions with N channels on the end, N=0 is background [# Images, 512, 512, N]
