@@ -100,12 +100,16 @@ def remove_56_78(annotations):
         indexes = indexes[0]
         for i in indexes:
             if amounts[i, 5] < amounts[i, 8]:
+                annotations[i, ..., 8] += annotations[i, ..., 5]
                 annotations[i, ..., 5] = 0
             else:
+                annotations[i, ..., 5] += annotations[i, ..., 8]
                 annotations[i, ..., 8] = 0
             if amounts[i, 6] < amounts[i, 7]:
+                annotations[i, ..., 7] += annotations[i, ..., 6]
                 annotations[i, ..., 6] = 0
             else:
+                annotations[i, ..., 6] += annotations[i, ..., 7]
                 annotations[i, ..., 7] = 0
     return annotations
 
@@ -118,12 +122,22 @@ class Fill_Missing_Segments(object):
         MauererDistanceMap.SquaredDistanceOff()
         self.MauererDistanceMap = MauererDistanceMap
 
-    def iterate_annotations(self, annotations, ground_truth, spacing, allowed_differences=50, max_iteration=15):
+    def iterate_annotations(self, annotations, ground_truth, spacing, allowed_differences=50, max_iteration=15, z_mult=1):
+        '''
+        :param annotations:
+        :param ground_truth:
+        :param spacing:
+        :param allowed_differences:
+        :param max_iteration:
+        :param z_mult: factor by which to ensure slices don't bleed into ones above and below
+        :return:
+        '''
         annotations[ground_truth == 0] = 0
         re_organized_spacing = spacing[-1::-1]
-        differences = [0,np.inf]
+        spacing[-1] *= z_mult
+        differences = [np.inf]
         index = 0
-        while np.abs(differences[-1] - differences[-2]) > allowed_differences and index < max_iteration:
+        while differences[-1] > allowed_differences and index < max_iteration:
             index += 1
             print('Iterating {}'.format(index))
             previous_iteration = copy.deepcopy(np.argmax(annotations,axis=-1))
