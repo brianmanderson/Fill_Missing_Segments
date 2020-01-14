@@ -152,6 +152,7 @@ class Fill_Missing_Segments(object):
         image = sitk.GetImageFromArray(array)
         image.SetSpacing(spacing)
         output = self.MauererDistanceMap.Execute(image)
+        output = sitk.GetArrayFromImage(output)
         return output
 
     def make_distance_map(self, pred, liver, reduce=True, spacing=(0.975,0.975,2.5)):
@@ -174,7 +175,7 @@ class Fill_Missing_Segments(object):
         for i in range(1,pred.shape[-1]):
             temp_reduce = reduced_pred[...,i]
             output = self.run_distance_map(temp_reduce, spacing)
-            reduced_output[...,i] = sitk.GetArrayFromImage(output)
+            reduced_output[...,i] = output
         reduced_output[reduced_output>0] = 0
         reduced_output = np.abs(reduced_output)
         reduced_output[...,0] = np.inf
