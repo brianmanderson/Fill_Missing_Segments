@@ -148,6 +148,12 @@ class Fill_Missing_Segments(object):
             differences.append(np.abs(np.sum(previous_iteration[ground_truth==1]-np.argmax(annotations,axis=-1)[ground_truth==1])))
         return annotations
 
+    def run_distance_map(self, array, spacing):
+        image = sitk.GetImageFromArray(array)
+        image.SetSpacing(spacing)
+        output = self.MauererDistanceMap.Execute(image)
+        return output
+
     def make_distance_map(self, pred, liver, reduce=True, spacing=(0.975,0.975,2.5)):
         '''
         :param pred: A mask of your predictions with N channels on the end, N=0 is background [# Images, 512, 512, N]
@@ -167,9 +173,7 @@ class Fill_Missing_Segments(object):
         reduced_output = np.zeros(reduced_pred.shape)
         for i in range(1,pred.shape[-1]):
             temp_reduce = reduced_pred[...,i]
-            image = sitk.GetImageFromArray(temp_reduce)
-            image.SetSpacing(spacing)
-            output = self.MauererDistanceMap.Execute(image)
+            output = self.run_distance_map(temp_reduce, spacing)
             reduced_output[...,i] = sitk.GetArrayFromImage(output)
         reduced_output[reduced_output>0] = 0
         reduced_output = np.abs(reduced_output)
