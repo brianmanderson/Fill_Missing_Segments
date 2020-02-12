@@ -34,7 +34,7 @@ def remove_non_liver(annotations, threshold=0.5, max_volume=9999999, min_volume=
     :param annotations: An annotation of shape [Z_images, rows, columns]
     :param threshold: Threshold of probability from 0.0 to 1.0
     :param max_volume: Max volume of structure allowed
-    :param min_volume: Minimum volume of structure allowed
+    :param min_volume: Minimum volume of structure allowed, in ccs
     :param max_area: Max volume of structure allowed
     :param min_area: Minimum volume of structure allowed
     :param do_3D: Do a 3D removal of structures, only take largest connected structure
@@ -42,6 +42,7 @@ def remove_non_liver(annotations, threshold=0.5, max_volume=9999999, min_volume=
     :param spacing: Spacing of elements, in form of [z_spacing, row_spacing, column_spacing]
     :return: Masked annotation
     '''
+    min_volume = min_volume * (10 * 10 * 10)  # cm to mm3
     annotations = copy.deepcopy(annotations)
     annotations = np.squeeze(annotations)
     if not annotations.dtype == 'int':
