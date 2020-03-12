@@ -28,7 +28,7 @@ def get_bounding_box_indexes(annotation):
     return min_z_s, int(max_z_s + 1), min_r_s, int(max_r_s + 1), min_c_s, int(max_c_s + 1)
 
 
-def remove_non_liver(annotations, threshold=0.5, max_volume=9999999, min_volume=0, max_area=99999, min_area=0,
+def remove_non_liver(annotations, threshold=0.5, max_volume=9999999.0, min_volume=0.0, max_area=99999.0, min_area=0.0,
                      do_3D = True, do_2D=False, spacing=None):
     '''
     :param annotations: An annotation of shape [Z_images, rows, columns]
@@ -80,7 +80,7 @@ def remove_non_liver(annotations, threshold=0.5, max_volume=9999999, min_volume=
                 for i in range(1, labels.max() + 1):
                     new_area = labels[labels == i].shape[0]
                     if spacing is not None:
-                        temp_area = np.prod(spacing[1:]) * new_area
+                        temp_area = np.prod(spacing[1:]) * new_area / 100
                         if temp_area > max_area:
                             continue
                         elif temp_area < min_area:
@@ -144,7 +144,7 @@ class Fill_Missing_Segments(object):
             previous_iteration = copy.deepcopy(np.argmax(annotations,axis=-1))
             annotations = remove_56_78(annotations)
             for i in range(1, annotations.shape[-1]):
-                annotations[..., i] = remove_non_liver(annotations[..., i], do_3D=True, do_2D=True,min_area=10,spacing=re_organized_spacing)
+                annotations[..., i] = remove_non_liver(annotations[..., i], do_3D=True, do_2D=True,min_area=.5,spacing=re_organized_spacing)
             annotations = self.make_distance_map(annotations, ground_truth,spacing=spacing)
             differences.append(np.abs(np.sum(previous_iteration[ground_truth==1]-np.argmax(annotations,axis=-1)[ground_truth==1])))
         return annotations
