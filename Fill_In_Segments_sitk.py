@@ -50,7 +50,7 @@ def remove_non_liver(annotations, threshold=0.5, max_volume=9999999.0, min_volum
         annotations[annotations > 0] = 1
         annotations = annotations.astype('int')
     if do_3D:
-        labels = morphology.label(annotations, neighbors=4)
+        labels = morphology.label(annotations, connectivity=1)
         if np.max(labels) > 1:
             area = []
             max_val = 0
